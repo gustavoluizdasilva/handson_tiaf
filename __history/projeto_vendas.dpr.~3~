@@ -1,0 +1,14 @@
+program projeto_vendas;
+
+uses
+  Vcl.Forms,
+  main in 'main.pas' {FrmMAIN};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TFrmMAIN, FrmMAIN);
+  Application.Run;
+end.
