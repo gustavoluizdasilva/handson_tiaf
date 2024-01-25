@@ -46,7 +46,7 @@ type
     property ValorVenda: Double read FValorVenda write FValorVenda;
   end;
 
-  TFrmPrincipal = class(TForm)
+   TFrmPrincipal = class(TForm)
     BtnCadCliente: TButton;
     ActionList1: TActionList;
     ActCadCliente: TAction;
@@ -73,22 +73,21 @@ type
     procedure ActQtdUnoExecute(Sender: TObject);
     procedure ActSemVendasExecute(Sender: TObject);
     procedure ActSorteadosExecute(Sender: TObject);
-    procedure Button6Click(Sender: TObject);
   private
     procedure Inserir(Entidade: TObject);
     procedure InserirDadosBD(SQL: string);
     function ExecutarSql(SQL: string): Variant;
+    function getSQLClientesSorteados: String;
   public
     procedure CriarTabelas;
   end;
-
 var
   FrmPrincipal: TFrmPrincipal;
 
 const
     ID_MAREA = 1;
     ID_UNO = 2;
-    ArrCLIENTE: array [0..4] of string = ('JosÈ', 'Rodrigo', 'Renato', 'Pedro', 'Jo„o');
+    ArrCLIENTE: array [0..4] of string = ('Jos√©', 'Rodrigo', 'Renato', 'Pedro', 'Jo√£o');
     ArrCPF: array [0..4] of string = ('12345678910', '98765432109', '00100200304', '01002003000', '10020030040');
     ArrCARRO: array [0..4] of string = ('Marea', 'Uno', 'Palio', '500', 'Punto');
 
