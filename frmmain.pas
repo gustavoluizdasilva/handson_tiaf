@@ -76,6 +76,7 @@ type
   private
     procedure Inserir(Entidade: TObject);
     procedure InserirDadosBD(SQL: string);
+    procedure DeletarDadosBD(SQL: string);
     function ExecutarSql(SQL: string): Variant;
     function getSQLClientesSorteados: String;
   public
@@ -96,9 +97,9 @@ implementation
 {$R *.dfm}
 
 {TMain}
-//---------------------------------------**
+//-----------------------------------------------**
 procedure TFrmPrincipal.Inserir(Entidade: TObject);
-//---------------------------------------**
+//-----------------------------------------------**
 var
     SQL: string;
 begin
@@ -135,21 +136,43 @@ begin
 
     InserirDadosBD(SQL);
 end;
-//---------------------------------------------**
+//-----------------------------------------------------**
 function TFrmPrincipal.ExecutarSql(SQL: string): Variant;
-//---------------------------------------------**
+//-----------------------------------------------------**
 begin
     Result := 0;
 end;
-//----------------------------------------**
+//------------------------------------------------**
 procedure TFrmPrincipal.FormCreate(Sender: TObject);
-//----------------------------------------**
+//------------------------------------------------**
 begin
     CriarTabelas;
 end;
-//--------------------------------------------------**
+//---------------------------------------------------**
+function TFrmPrincipal.getSQLClientesSorteados: String;
+//---------------------------------------------------**
+begin
+    Result := ' SELECT Cliente.nome, cliente.id_cliente';
+    Result := Result + ' FROM Cliente';
+    Result := Result + ' JOIN Venda ON Cliente.id_cliente = Venda.id_cliente';
+    Result := Result + ' JOIN Carro ON Venda.id_carro = Carro.id_carro';
+    Result := Result + ' WHERE SUBSTRING(Cliente.cpf, 1, 1) = ''0''';
+    Result := Result + ' AND EXTRACT(YEAR FROM Carro.data_lancamento) = 2021';
+    Result := Result + ' AND Cliente.id_cliente NOT IN (';
+    Result := Result + ' SELECT id_cliente';
+    Result := Result + ' FROM Venda AS V';
+    Result := Result + ' JOIN Carro AS C ON V.id_carro = C.id_carro';
+    Result := Result + ' WHERE C.id_carro = '+IntToStr(ID_MAREA);
+    Result := Result + ' GROUP BY V.id_cliente';
+    Result := Result + ' HAVING COUNT(*) >= 2';
+    Result := Result + ' )';
+    Result := Result + ' GROUP BY Cliente.id_cliente, Cliente.nome, Venda.data_venda';
+    Result := Result + ' ORDER BY Venda.data_venda';
+    Result := Result + ' LIMIT 15';
+end;
+//----------------------------------------------------------**
 procedure TFrmPrincipal.ActCadClienteExecute(Sender: TObject);
-//--------------------------------------------------**
+//----------------------------------------------------------**
 var
     I: Integer;
     Cliente: TCliente;
@@ -157,16 +180,16 @@ begin
     for I := 1 to 5 do
     begin
         Cliente := TCliente.Create;
-        Cliente.Nome := ArrCLIENTE[I];
-        Cliente.CPF := ArrCPF[I];
+        Cliente.Nome := ArrCLIENTE[I-1];
+        Cliente.CPF := ArrCPF[I-1];
         Cliente.DataNascimento := EncodeDate(2000, 1, 1) + I;
         Inserir(Cliente);
         Cliente.Free;
     end;
 end;
-//--------------------------------------------------**
+//----------------------------------------------------------**
 procedure TFrmPrincipal.ActCadVeiculoExecute(Sender: TObject);
-//--------------------------------------------------**
+//----------------------------------------------------------**
 var
     I: Integer;
     Carro: TCarro;
@@ -174,15 +197,15 @@ begin
     for I := 1 to 5 do
     begin
         Carro := TCarro.Create;
-        Carro.Modelo := ArrCARRO[I];
+        Carro.Modelo := ArrCARRO[I-1];
         Carro.DataLancamento := EncodeDate(2022, I, 1);
         Inserir(Carro);
         Carro.Free;
     end;
 end;
-//-------------------------------------------------**
+//---------------------------------------------------------**
 procedure TFrmPrincipal.ActCadVendasExecute(Sender: TObject);
-//-------------------------------------------------**
+//---------------------------------------------------------**
 var
     I: Integer;
     Venda: TVenda;
@@ -201,8 +224,14 @@ end;
 //---------------------------------------------------**
 procedure TFrmPrincipal.actExcuiVendasExecute(Sender: TObject);
 //---------------------------------------------------**
+var
+    SQL: String;
 begin
-// not Exists
+    SQL := 'DELETE FROM public.Vendas USING (';
+    SQL := SQL + getSqlClientesSorteados + ') AS Sorteados';
+    SQL := SQL + 'WHERE venda.Id_cliente <> sorteados.id_cliente';
+
+    DeletarDadosDB(SQL);
 end;
 //------------------------------------------------**
 procedure TFrmPrincipal.ActQtdMareaExecute(Sender: TObject);
@@ -246,29 +275,12 @@ end;
 //-------------------------------------------------**
 procedure TFrmPrincipal.ActSorteadosExecute(Sender: TObject);
 //-------------------------------------------------**
-var
-    SQL: String;
 begin
-    SQL := 'SELECT Cliente.nome';
-    SQL := SQL + ' FROM Cliente';
-    SQL := SQL + ' JOIN Venda ON Cliente.id_cliente = Venda.id_cliente';
-    SQL := SQL + ' JOIN Carro ON Venda.id_carro = Carro.id_carro';
-    SQL := SQL + ' WHERE SUBSTRING(Cliente.cpf, 1, 1) = ''0''';
-    SQL := SQL + ' AND EXTRACT (YEAR FROM Carro.data_lancamento) = 2021';
-    SQL := SQL + ' GROUP BY Cliente.nome';
-    SQL := SQL + ' ORDER BY Venda.data_venda';
-    SQL := SQL + ' LIMIT 15';
-
-    ShowMessage(ExecutarSQL(SQL));
+    ShowMessage(ExecutarSQL(getSqlClientesSorteados));
 end;
-procedure TFrmPrincipal.Button6Click(Sender: TObject);
-begin
-
-end;
-
-//-------------------------**
+//----------------------------------**
 procedure TFrmPrincipal.CriarTabelas;
-//-------------------------**
+//----------------------------------**
 begin
   ExecutarSql(
     'CREATE TABLE IF NOT EXISTS Cliente (' +
@@ -299,9 +311,15 @@ begin
     ');'
   );
 end;
-//----------------------------------------**
+//------------------------------------------------**
+procedure TFrmPrincipal.DeletarDadosBD(SQL: string);
+//------------------------------------------------**
+begin
+//
+end;
+//------------------------------------------------**
 procedure TFrmPrincipal.InserirDadosBD(SQL: string);
-//----------------------------------------**
+//------------------------------------------------**
 begin
  //
 end;
