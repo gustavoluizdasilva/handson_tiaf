@@ -119,7 +119,7 @@ begin
         SQL := SQL + ' modelo, data_lancamento) ';
         SQL := SQL + ' VALUES (';
         SQL := SQL + QuotedStr(TCarro(Entidade).Modelo) + ',';
-        SQL := SQL + QuotedStr(DateToStr(TCarro(Entidade).DataLancamento)) + ',';
+        SQL := SQL + QuotedStr(DateToStr(TCarro(Entidade).DataLancamento));
         SQL := SQL + ')';
     end
     else if Entidade is TVenda then
@@ -127,10 +127,10 @@ begin
         SQL := ' INSERT INTO public.venda(';
         SQL := SQL + ' id_cliente, id_carro, data_venda, valor_venda)';
         SQL := SQL + ' VALUES ( ';
-        SQL := SQL + QuotedStr(IntToStr(TVenda(Entidade).IDCliente)) + ',';
-        SQL := SQL + QuotedStr(IntToStr(TVenda(Entidade).IDCarro)) + ',';
+        SQL := SQL + IntToStr(TVenda(Entidade).IDCliente) + ',';
+        SQL := SQL + IntToStr(TVenda(Entidade).IDCarro) + ',';
         SQL := SQL + QuotedStr(DateToStr(TVenda(Entidade).DataVenda)) + ',';
-        SQL := SQL + QuotedStr(FloatToStr(TVenda(Entidade).ValorVenda)) + ',';
+        SQL := SQL + FloatToStr(TVenda(Entidade).ValorVenda);
         SQL := SQL + ')';
     end;
 
@@ -227,11 +227,11 @@ procedure TFrmPrincipal.actExcuiVendasExecute(Sender: TObject);
 var
     SQL: String;
 begin
-    SQL := 'DELETE FROM public.Vendas USING (';
+    SQL := 'DELETE FROM public.Venda USING (';
     SQL := SQL + getSqlClientesSorteados + ') AS Sorteados';
-    SQL := SQL + 'WHERE venda.Id_cliente <> sorteados.id_cliente';
+    SQL := SQL + ' WHERE venda.Id_cliente <> sorteados.id_cliente';
 
-    DeletarDadosDB(SQL);
+    DeletarDadosBD(SQL);
 end;
 //------------------------------------------------**
 procedure TFrmPrincipal.ActQtdMareaExecute(Sender: TObject);
